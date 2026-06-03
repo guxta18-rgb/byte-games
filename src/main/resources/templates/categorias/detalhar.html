@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ByteGames - Detalhes da Categoria</title>
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">BYTE<span>GAMES</span></a>
+        <div class="navbar-links">
+            <a href="/categorias" class="btn btn-secundario btn-sm">← Voltar para Categorias</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-container" style="max-width: 600px;">
+            <h3 style="text-align: left; border-bottom: 1px solid var(--border); padding-bottom: 14px;">📂 Detalhes da Categoria</h3>
+
+            <div style="margin-top: 20px;">
+                <p style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Nome</p>
+                <h1 th:text="${categoria.nome}" style="font-size: 26px; color: var(--purple); margin: 6px 0 20px;"></h1>
+
+                <div th:if="${categoria.descricao != null and !#strings.isEmpty(categoria.descricao)}" style="margin-bottom: 24px;">
+                    <p style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Descrição</p>
+                    <div class="descricao-box" th:text="${categoria.descricao}"></div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between;">
+                    <a href="/categorias" class="btn btn-secundario">← Voltar</a>
+                    <a th:href="@{/categorias/{id}/editar(id=${categoria.id})}" class="btn btn-purple">✏️ Editar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

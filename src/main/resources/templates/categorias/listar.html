@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ByteGames - Admin Categorias</title>
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">BYTE<span>GAMES</span></a>
+        <div class="navbar-links">
+            <a href="/" class="btn btn-secundario btn-sm">🛒 Loja</a>
+            <a href="/produtos" class="btn btn-secundario btn-sm">🎮 Produtos</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">📂 Gerenciar Categorias</h1>
+                <p class="page-subtitle">Organize os gêneros de jogos da loja</p>
+            </div>
+            <a href="/categorias/nova" class="btn btn-principal">+ Nova Categoria</a>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Descrição</th>
+                        <th style="text-align: center;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="cat : ${categorias}">
+                        <td style="color: var(--text-muted);" th:text="${cat.id}">1</td>
+                        <td><span th:text="${cat.nome}" style="font-weight: 600; color: var(--purple);"></span></td>
+                        <td th:text="${cat.descricao != null ? cat.descricao : '-'}" style="color: var(--text-secondary); font-size: 13px;"></td>
+                        <td>
+                            <div style="display: flex; gap: 6px; justify-content: center;">
+                                <a th:href="@{/categorias/{id}(id=${cat.id})}" class="btn btn-info btn-sm">Ver</a>
+                                <a th:href="@{/categorias/{id}/editar(id=${cat.id})}" class="btn btn-secundario btn-sm">Editar</a>
+                                <form th:action="@{/categorias/{id}/excluir(id=${cat.id})}" method="post"
+                                      onsubmit="return confirm('Excluir esta categoria? Os produtos vinculados também serão removidos!');" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(categorias)}">
+                        <td colspan="4" class="empty-state"><p>Nenhuma categoria cadastrada.</p></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

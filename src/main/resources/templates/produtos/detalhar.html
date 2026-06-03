@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ByteGames - Detalhes do Produto</title>
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">BYTE<span>GAMES</span></a>
+        <div class="navbar-links">
+            <a href="/produtos" class="btn btn-secundario btn-sm">← Voltar para Lista</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-container" style="max-width: 700px;">
+            <h3 style="text-align: left; border-bottom: 1px solid var(--border); padding-bottom: 14px;">ℹ️ Ficha do Produto</h3>
+
+            <div style="margin-top: 20px;">
+                <p style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Nome</p>
+                <h1 th:text="${produto.nome}" style="font-size: 26px; margin: 6px 0 20px;"></h1>
+
+                <div class="detail-row">
+                    <div class="detail-item">
+                        <label>Preço</label>
+                        <span class="detail-value" style="color: var(--green);"
+                              th:text="${'R$ ' + #numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}"></span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Categoria</label>
+                        <span class="detail-value" style="color: var(--purple);" th:text="${produto.categoria.nome}"></span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Estoque</label>
+                        <span th:text="${produto.estoque}"
+                              th:class="${produto.estoque == 0} ? 'badge bg-perigo' : 'badge bg-sucesso'"
+                              style="font-size: 14px; display: inline-block; margin-top: 4px;"></span>
+                    </div>
+                </div>
+
+                <p style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Descrição</p>
+                <div class="descricao-box" th:text="${produto.descricao}"></div>
+
+                <div style="display: flex; justify-content: space-between;">
+                    <a href="/produtos" class="btn btn-secundario">← Voltar</a>
+                    <a th:href="@{/produtos/{id}/editar(id=${produto.id})}" class="btn btn-purple">✏️ Editar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

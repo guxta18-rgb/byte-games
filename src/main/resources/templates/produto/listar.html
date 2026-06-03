@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ByteGames - Painel Administrativo</title>
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1>🎮 ByteGames - Painel Administrativo</h1>
+            <a href="/produtos/novo" class="btn btn-principal">+ Cadastrar Novo Jogo</a>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome do Jogo</th>
+                    <th>Categoria</th>
+                    <th>Preço</th>
+                    <th>Estoque</th>
+                    <th style="text-align: center;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="prod : ${produtos}">
+                    <td th:text="${prod.id}">1</td>
+                    <td>
+                        <span th:text="${prod.nome}" style="font-weight: bold; display: block; color: #fff;">Nome</span>
+                        <small th:text="${prod.descricao}" style="color: #a8a8b3; font-size: 12px;"></small>
+                    </td>
+                    <td th:text="${prod.categoria.nome}">Categoria</td>
+                    <td th:text="${'R$ ' + prod.preco}">R$ 0.00</td>
+                    <td>
+                        <span th:text="${prod.estoque}" 
+                              th:class="${prod.estoque == 0} ? 'badge bg-perigo' : 'badge bg-sucesso'">0</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <div style="display: flex; gap: 8px; justify-content: center;">
+                            <a th:href="@{/produtos/{id}(id=${prod.id})}" class="btn btn-info" style="padding: 5px 10px;">Ver</a>
+                            <a th:href="@{/produtos/{id}/editar(id=${prod.id})}" class="btn btn-secundario" style="padding: 5px 10px;">Editar</a>
+                            
+                            <form th:action="@{/produtos/{id}/excluir(id=${prod.id})}" method="post" 
+                                  onsubmit="return confirm('Excluir este jogo permanentemente?');" style="display: inline;">
+                                <button type="submit" class="btn btn-danger" style="padding: 5px 10px;">Excluir</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(produtos)}">
+                    <td colspan="6" style="text-align: center; color: #a8a8b3; padding: 30px;">Nenhum jogo cadastrado no sistema.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

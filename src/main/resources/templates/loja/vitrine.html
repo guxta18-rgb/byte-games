@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ByteGames - Loja Oficial</title>
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">BYTE<span>GAMES</span></a>
+        <div class="navbar-links">
+            <a href="/carrinho" class="btn btn-purple btn-sm">🛍️ Carrinho</a>
+            <a href="/produtos" class="btn btn-secundario btn-sm">⚙️ Produtos</a>
+            <a href="/categorias" class="btn btn-secundario btn-sm">📂 Categorias</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Catálogo de Jogos</h1>
+                <p class="page-subtitle">Encontre os melhores títulos para sua coleção</p>
+            </div>
+        </div>
+
+        <form action="/" method="get" class="barra-busca">
+            <input type="text" name="search" th:value="${termoBuscado}" placeholder="Buscar jogo pelo nome..." style="flex: 1;">
+            <button type="submit" class="btn btn-principal">🔍 Pesquisar</button>
+            <a href="/" th:if="${termoBuscado != null}" class="btn btn-secundario">✕ Limpar</a>
+        </form>
+
+        <p th:if="${termoBuscado != null}" style="color: var(--text-secondary); margin-bottom: 15px;">
+            Resultados para: <strong style="color: var(--purple)" th:text="${termoBuscado}"></strong>
+        </p>
+
+        <div class="grid-produtos">
+            <div class="card-produto" th:each="prod : ${produtos}">
+                <div>
+                    <span class="badge-categoria" th:text="${prod.categoria.nome}"></span>
+                    <h4 th:text="${prod.nome}"></h4>
+                    <p th:text="${#strings.abbreviate(prod.descricao, 100)}" style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;"></p>
+                </div>
+                <div>
+                    <div class="preco-tag" th:text="${'R$ ' + #numbers.formatDecimal(prod.preco, 1, 'POINT', 2, 'COMMA')}"></div>
+                    <div th:if="${prod.estoque > 0}">
+                        <form th:action="@{/carrinho/adicionar}" method="post">
+                            <input type="hidden" name="produtoId" th:value="${prod.id}">
+                            <button type="submit" class="btn btn-principal" style="width: 100%;">+ Adicionar ao Carrinho</button>
+                        </form>
+                    </div>
+                    <div th:if="${prod.estoque == 0}">
+                        <button class="btn btn-secundario" style="width: 100%; cursor: not-allowed; opacity: 0.45;" disabled>Esgotado</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(produtos)}">
+            <p>Nenhum jogo encontrado. <a href="/" style="color: var(--purple);">Ver todos os jogos</a></p>
+        </div>
+    </div>
+</body>
+</html>
