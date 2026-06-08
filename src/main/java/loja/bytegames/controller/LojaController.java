@@ -143,4 +143,4 @@ public class LojaController {
         session.removeAttribute("carrinho");
         return "redirect:/carrinho";
     }
-}
+}
