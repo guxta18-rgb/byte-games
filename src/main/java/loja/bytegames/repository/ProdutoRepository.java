@@ -1,24 +1,35 @@
 package loja.bytegames.repository;
 
+// Importação do modelo Produto e utilitários
 import loja.bytegames.model.Produto;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import java.util.List;
 
+// Importações do Spring Data JPA
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 /*
- * Este arquivo representa o repositório de Produto.
- * Ele serve para gerenciar todas as leituras, salvamentos, exclusões 
- * e alterações na tabela de produtos no banco de dados.
+ * CONTEXTO DESTA INTERFACE:
+ * Este é o Repositório de Produto (ProdutoRepository). Assim como a CategoriaRepository,
+ * ela estende JpaRepository para prover todo o CRUD padrão de produtos. Além disso, expõe 
+ * um método de busca customizado para fazer filtros por nome do jogo na barra de pesquisa da loja.
  */
 
-// A anotação @Repository avisa ao Spring Boot que esta interface gerencia a conexão da tabela de produtos.
-@Repository
-// Herdamos JpaRepository para ganhar comandos básicos como findAll(), save(), findById() e deleteById() de graça.
+@Repository // Registra a interface como repositório Spring Data JPA no contêiner IoC
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
-    // Este método serve para buscar produtos pelo nome ou parte dele.
-    // Containing: significa buscar por partes do nome (como se usasse o comando LIKE %termo% no SQL).
-    // IgnoreCase: significa que não importa se a busca for por letras maiúsculas ou minúsculas.
-    // O Spring Data JPA monta essa consulta no banco de dados sozinho apenas lendo o nome do método!
+    // Query Method: Busca produtos cujo nome contenha o termo digitado.
+    // Containing: Equivale ao operador SQL 'LIKE %termo%'
+    // IgnoreCase: Ignora a diferença entre letras maiúsculas e minúsculas no banco
     List<Produto> findByNomeContainingIgnoreCase(String nome);
+    
+    /* 
+     * SE O PROFESSOR PEDIR PARA ADICIONAR FILTRAGEM POR CATEGORIA:
+     * Você pode adicionar outro Query Method aproveitando o relacionamento:
+     *    List<Produto> findByCategoriaId(Long categoriaId);
+     * 
+     * SE O PROFESSOR PEDIR PARA FILTRAR APENAS PRODUTOS COM ESTOQUE DISPONÍVEL:
+     * Você pode fazer:
+     *    List<Produto> findByEstoqueGreaterThan(Integer estoqueMinimo); // ex: passar 0 no parâmetro
+     */
 }

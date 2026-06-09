@@ -1,73 +1,77 @@
 package loja.bytegames.model;
 
+// Importação das anotações de persistência da JPA
 import jakarta.persistence.*;
+
+// Importações para validações de formulário do Jakarta Validation
 import jakarta.validation.constraints.*;
+
+// Importação para manipulação exata de valores monetários
 import java.math.BigDecimal;
 
 /*
- * Este arquivo representa a classe Produto.
- * Ela serve para definir os detalhes de um jogo (como nome, descrição, preço e estoque) 
- * que vamos cadastrar na nossa loja e salvar no banco de dados MySQL.
+ * CONTEXTO DESTA CLASSE:
+ * Esta é a classe de Entidade Produto (Produto.java). Ela representa a tabela 'produto' no banco de dados.
+ * Ela armazena os atributos essenciais de cada jogo (nome, descrição, preço e quantidade em estoque) 
+ * e faz o relacionamento com a entidade Categoria.
  */
 
-// A anotação @Entity avisa ao Spring Boot/Java que esta classe se tornará uma tabela no banco de dados.
-@Entity
-// A anotação @Table define o nome exato da tabela no banco de dados.
-@Table(name = "produto")
+@Entity // Define a classe como uma entidade mapeada no banco de dados
+@Table(name = "produto") // Especifica o nome da tabela física no banco de dados
 public class Produto {
 
-    // O @Id indica que o atributo 'id' é a chave primária.
-    // O @GeneratedValue com a estratégia IDENTITY faz o banco de dados numerar os IDs de 1 em 1 automaticamente.
+    // @Id: Define a chave primária
+    // @GeneratedValue: Indica que o banco de dados auto-incrementa o ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // @NotBlank não aceita texto vazio ou apenas espaços em branco.
-    // @Size restringe a quantidade de caracteres para o nome do jogo.
-    // @Column configura a coluna no banco de dados (obrigatória e tamanho máximo de 100).
+    // @NotBlank: Garante que o texto não seja nulo nem vazio
+    // @Size: Limita a quantidade de caracteres permitidos
+    // @Column: Define restrições físicas no banco de dados (não nulo e tamanho máximo de 100 caracteres)
     @NotBlank(message = "O nome do jogo/produto é obrigatório!")
     @Size(min = 2, max = 100, message = "O nome deve ter entre 2 e 100 caracteres.")
     @Column(nullable = false, length = 100)
     private String nome;
 
-    // @NotBlank não permite descrição vazia.
-    // @Size limita o tamanho da descrição.
+    // @NotBlank: Torna a descrição obrigatória no formulário
+    // @Size: Limita o comprimento do texto da descrição
     @NotBlank(message = "A descrição é obrigatória!")
     @Size(max = 500, message = "A descrição não pode passar de 500 caracteres.")
     @Column(nullable = false, length = 500)
     private String descricao;
 
-    // @NotNull garante que o preço seja preenchido.
-    // @DecimalMin garante que o preço não seja de graça (mínimo de R$ 0,01).
-    // @Column define o tamanho e precisão decimal no banco de dados (ex: R$ 99999999.99).
+    // @NotNull: Preço não pode ficar em branco
+    // @DecimalMin: Impede preços iguais ou menores que zero (exige valor positivo de pelo menos 0.01)
+    // @Column: Define precisão de 10 dígitos com até 2 casas decimais no banco (ex: 99999999.99)
     @NotNull(message = "O preço é obrigatório!")
     @DecimalMin(value = "0.01", message = "O preço deve ser maior que zero.")
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal preco;
 
-    // @NotNull garante que o estoque seja preenchido.
-    // @Min impede que o estoque tenha valores negativos (mínimo 0).
+    // @NotNull: Impede que a quantidade de estoque seja nula
+    // @Min: Impede estoque negativo
     @NotNull(message = "A quantidade em estoque é obrigatória!")
     @Min(value = 0, message = "O estoque não pode ser negativo.")
     @Column(nullable = false)
     private Integer estoque;
 
-    // @ManyToOne indica que "Muitos produtos pertencem a uma categoria".
-    // @JoinColumn indica qual é o nome da coluna que faz a ligação das duas tabelas (categoria_id).
-    // @NotNull garante que todo produto seja associado a alguma categoria cadastrada.
+    // @ManyToOne: Relacionamento Muitos para Um. Vários produtos podem pertencer a uma única Categoria.
+    // fetch = FetchType.LAZY: Carrega os dados da categoria sob demanda para otimizar as consultas
+    // @JoinColumn: Especifica o nome da coluna física de chave estrangeira (categoria_id)
+    // @NotNull: Garante que todo produto cadastrado deve obrigatoriamente estar vinculado a uma categoria
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false)
     @NotNull(message = "Selecione uma categoria válida!")
     private Categoria categoria;
 
-    // Construtor vazio: obrigatório para o framework JPA criar instâncias do produto.
+    // Construtor vazio: Requisito fundamental do Hibernate/JPA para converter registros do banco em instâncias Java
     public Produto() {
     }
 
-    // --- Métodos de Acesso (Getters e Setters) ---
-    // Usados para ler ou alterar as variáveis privadas.
+    // --- MÉTODOS GETTERS E SETTERS ---
+    // Métodos para encapsulamento das propriedades privadas da classe
 
-    // Métodos para o ID
     public Long getId() {
         return id;
     }
@@ -76,7 +80,6 @@ public class Produto {
         this.id = id;
     }
 
-    // Métodos para o Nome
     public String getNome() {
         return nome;
     }
@@ -85,7 +88,6 @@ public class Produto {
         this.nome = nome;
     }
 
-    // Métodos para a Descrição
     public String getDescricao() {
         return descricao;
     }
@@ -94,7 +96,6 @@ public class Produto {
         this.descricao = descricao;
     }
 
-    // Métodos para o Preço
     public BigDecimal getPreco() {
         return preco;
     }
@@ -103,7 +104,6 @@ public class Produto {
         this.preco = preco;
     }
 
-    // Métodos para o Estoque
     public Integer getEstoque() {
         return estoque;
     }
@@ -112,7 +112,6 @@ public class Produto {
         this.estoque = estoque;
     }
 
-    // Métodos para a Categoria
     public Categoria getCategoria() {
         return categoria;
     }
@@ -120,4 +119,16 @@ public class Produto {
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
     }
+    
+    /* 
+     * SE O PROFESSOR PERGUNTAR POR QUE USAMOS 'BigDecimal' PARA O PREÇO E NÃO 'double' OU 'float':
+     * Double e float são tipos de ponto flutuante binário que podem sofrer com pequenas imprecisões e erros 
+     * de arredondamento em cálculos matemáticos (ex: 0.1 + 0.2 resultar em 0.30000000000000004). Para valores 
+     * monetários, isso é inaceitável. O BigDecimal oferece controle total de precisão e arredondamento decimal, 
+     * garantindo exatidão absoluta nas contas.
+     * 
+     * SE O PROFESSOR PEDIR PARA ADICIONAR UMA NOVA VALIDAÇÃO (ex: desconto máximo de preço, ou limite de estoque):
+     * Você pode adicionar anotações como:
+     *    @Max(value = 1000, message = "O estoque não pode ultrapassar 1000 unidades.")
+     */
 }

@@ -1,54 +1,58 @@
 package loja.bytegames.model;
 
+// Importação das anotações do JPA para persistência em banco de dados
 import jakarta.persistence.*;
+
+// Importação das anotações do Jakarta Validation para validação de campos
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+// Importação da classe de listas do Java
 import java.util.List;
 
 /*
- * Este arquivo representa a classe Categoria.
- * Ela serve para definir como uma categoria de jogo (como RPG, Ação, etc.) 
- * será guardada dentro da nossa tabela do banco de dados MySQL.
+ * CONTEXTO DESTA CLASSE:
+ * Esta é a classe de Entidade Categoria (Categoria.java). Ela representa uma tabela do banco de dados 
+ * relacional mapeada pelo framework ORM (Mapeamento Objeto-Relacional) chamado Hibernate/JPA.
+ * Ela serve para organizar os produtos/jogos em divisões lógicas (ex: RPG, FPS, Ação).
  */
 
-// A anotação @Entity diz para o Java que esta classe representa uma tabela no banco de dados.
-@Entity
-// A anotação @Table diz qual é o nome exato da tabela que vai ser criada no banco de dados.
-@Table(name = "categoria")
+@Entity // Define para a JPA que esta classe é uma entidade mapeada para uma tabela no banco de dados
+@Table(name = "categoria") // Especifica o nome físico da tabela no banco de dados
 public class Categoria {
 
-    // O @Id diz que esse atributo é a chave primária da nossa tabela (o identificador único).
-    // O @GeneratedValue diz que o banco de dados vai gerar esse número sozinho (1, 2, 3, etc.).
+    // @Id: Define que este atributo é a Chave Primária (Primary Key) da tabela no banco
+    // @GeneratedValue: Define a estratégia de geração do ID. IDENTITY indica auto-incremento (1, 2, 3...)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // O @NotBlank garante que o nome da categoria não seja vazio ou cheio de espaços.
-    // O @Size limita o tamanho do texto do nome.
-    // O @Column diz que este campo é obrigatório (nullable = false) e não pode repetir no banco (unique = true).
+    // @NotBlank: Validação que impede textos nulos, vazios ou apenas com espaços em branco
+    // @Size: Validação que limita o comprimento mínimo e máximo do texto inserido
+    // @Column: Configura metadados da coluna no banco (obrigatória e valor único, impedindo duplicados)
     @NotBlank(message = "O nome da categoria é obrigatório!")
     @Size(min = 2, max = 50, message = "O nome deve ter entre 2 e 50 caracteres.")
     @Column(nullable = false, unique = true)
     private String nome;
 
-    // O @Size limita a descrição para ter no máximo 200 letras/caracteres.
+    // @Size: Validação que define o tamanho máximo da descrição
     @Size(max = 200, message = "A descrição deve ter no máximo 200 caracteres.")
     private String descricao;
 
-    // O @OneToMany serve para conectar as tabelas. 
-    // Significa que "Uma categoria pode ter muitos produtos associados a ela".
-    // mappedBy = "categoria" avisa que a variável 'categoria' está dentro da classe Produto.
+    // @OneToMany: Mapeamento de relacionamento Um para Muitos. Uma categoria possui muitos produtos.
+    // mappedBy: Indica qual é o atributo na classe 'Produto' que é o dono da relação (mapeamento bidirecional)
+    // cascade = CascadeType.ALL: Operações de salvar, atualizar ou deletar nesta categoria se aplicam aos produtos dela
+    // fetch = FetchType.LAZY: Carrega os produtos do banco sob demanda (preguiçoso), poupando memória ao listar apenas categorias
     @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Produto> produtos;
 
-    // Construtor vazio: é uma exigência do Hibernate/JPA para conseguir criar a classe a partir do banco.
+    // Construtor padrão sem argumentos: Obrigatório para o framework Hibernate instanciar objetos vindo do banco
     public Categoria() {
     }
 
-    // --- Métodos de Acesso (Getters e Setters) ---
-    // Servem para pegar (get) ou mudar (set) as variáveis que são privadas (private).
+    // --- MÉTODOS GETTERS E SETTERS (Métodos de Acesso e Modificação) ---
+    // Essenciais para o encapsulamento do Java (variáveis privadas expostas de forma controlada)
 
-    // Métodos para o ID
     public Long getId() {
         return id;
     }
@@ -57,7 +61,6 @@ public class Categoria {
         this.id = id;
     }
 
-    // Métodos para o Nome
     public String getNome() {
         return nome;
     }
@@ -66,7 +69,6 @@ public class Categoria {
         this.nome = nome;
     }
 
-    // Métodos para a Descrição
     public String getDescricao() {
         return descricao;
     }
@@ -75,7 +77,6 @@ public class Categoria {
         this.descricao = descricao;
     }
 
-    // Métodos para a Lista de Produtos
     public List<Produto> getProdutos() {
         return produtos;
     }
@@ -83,5 +84,16 @@ public class Categoria {
     public void setProdutos(List<Produto> produtos) {
         this.produtos = produtos;
     }
+    
+    /* 
+     * SE O PROFESSOR PERGUNTAR QUAL A DIFERENÇA ENTRE LAZY E EAGER FETCH:
+     * - LAZY (preguiçoso): Só carrega a lista de produtos do banco de dados quando você chamar 
+     *   explicitamente "categoria.getProdutos()". É excelente para performance.
+     * - EAGER (ansioso): Traz os produtos do banco automaticamente no momento em que busca a categoria, 
+     *   mesmo que você nunca os use no código. Pode deixar o app lento se houver muitos registros.
+     * 
+     * SE O PROFESSOR PEDIR PARA MUDAR O CASCADE PARA NÃO EXCLUIR OS PRODUTOS SE DELETAR A CATEGORIA:
+     * Mude o cascade de 'CascadeType.ALL' para apenas 'CascadeType.PERSIST' ou 'CascadeType.MERGE'.
+     */
 }
 

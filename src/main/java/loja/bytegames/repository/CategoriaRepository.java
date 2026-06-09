@@ -1,23 +1,39 @@
 package loja.bytegames.repository;
 
+// Importação da entidade Categoria
 import loja.bytegames.model.Categoria;
+
+// Importações do Spring Data JPA
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /*
- * Este arquivo representa o repositório de Categoria.
- * Em programação de banco de dados, o repositório é como um "gerente" que cuida 
- * das operações de salvar, ler, alterar e deletar informações na tabela correspondente.
+ * CONTEXTO DESTA INTERFACE:
+ * Este é o Repositório de Categoria (CategoriaRepository). No Spring Data JPA, as interfaces 
+ * de repositório servem de ponte direta com o Banco de Dados. Ao estender 'JpaRepository', 
+ * o Spring cria por baixo dos panos toda a implementação com comandos SQL prontos de inserção, 
+ * busca, atualização e exclusão, sem precisarmos escrever nenhuma query SQL manual.
  */
 
-// A anotação @Repository avisa ao Spring Boot que esta interface cuida das conexões com o banco de dados.
-@Repository
-// Ao herdar (extends) JpaRepository, o Spring Boot cria automaticamente todos os comandos SQL básicos para nós.
-// Passamos Categoria (a classe da tabela) e Long (o tipo de dados do ID).
+@Repository // Registra a interface como um componente de persistência do Spring
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
+    // Categoria: Classe que representa a tabela mapeada
+    // Long: Tipo da chave primária (ID) definida na model Categoria
 
-    // Este método verifica se já existe alguma categoria cadastrada com o nome passado no parâmetro.
-    // O Spring Data é inteligente e cria a busca no banco apenas lendo o nome do método!
+    // Query Method: O Spring Data JPA interpreta o nome do método e gera a query correspondente
+    // Equivale ao SQL: SELECT COUNT(*) > 0 FROM categoria WHERE nome = :nome
     boolean existsByNome(String nome);
+    
+    /* 
+     * SE O PROFESSOR PERGUNTAR COMO FUNCIONAM OS 'QUERY METHODS':
+     * Explique que o Spring Data JPA possui um analisador de sintaxe (parser) que lê o nome do método. 
+     * A presença de palavras como 'findBy', 'existsBy', 'countBy', associada ao nome do atributo ('Nome', 'Descricao'), 
+     * diz ao Spring exatamente qual consulta SQL ele deve montar em tempo de execução.
+     * 
+     * SE O PROFESSOR PEDIR PARA ADICIONAR UMA QUERY MANUAL PERSONALIZADA (JPQL):
+     * Você pode usar a anotação @Query:
+     *    @org.springframework.data.jpa.repository.Query("SELECT c FROM Categoria c WHERE c.nome LIKE %:termo%")
+     *    java.util.List<Categoria> buscarPorParteDoNome(String termo);
+     */
 }
 

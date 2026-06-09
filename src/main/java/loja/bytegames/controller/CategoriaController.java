@@ -1,149 +1,190 @@
 package loja.bytegames.controller;
 
+// Importação da entidade Categoria e de seu repositório de banco de dados
 import loja.bytegames.model.Categoria;
 import loja.bytegames.repository.CategoriaRepository;
+
+// Importações do jakarta validation e componentes do Spring MVC
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+// Utilidade Java para manipular buscas opcionais que podem ser nulas
 import java.util.Optional;
 
 /*
- * Este arquivo representa o Controlador de Categorias.
- * O controlador é responsável por escutar o que o usuário clica ou digita na página HTML 
- * (as requisições), conversar com o banco de dados e devolver a página HTML correta para o navegador.
+ * CONTEXTO DESTA CLASSE:
+ * Este é o Controlador de Categorias (CategoriaController). Ele gerencia as requisições web
+ * voltadas para a organização dos jogos (RPG, Ação, FPS, etc.). Permite listar, criar, editar
+ * e excluir categorias do sistema.
  */
 
-// A anotação @Controller avisa que esta classe gerencia as telas e caminhos (rotas) do site.
-// @RequestMapping("/categorias") faz todas as rotas dessa classe começarem com "/categorias".
-@Controller
-@RequestMapping("/categorias")
+@Controller // Registra a classe como um controlador Spring MVC
+@RequestMapping("/categorias") // Define que as URLs mapeadas começam com "/categorias"
 public class CategoriaController {
 
-    // Criamos a variável do repositório para conseguirmos mexer na tabela de categorias.
+    // Repositório que fornece os métodos de manipulação da tabela no banco de dados
     private final CategoriaRepository categoriaRepository;
 
-    // Construtor: o Spring Boot injeta o repository automaticamente aqui.
+    // Construtor: injeção de dependência automática das classes de dados pelo Spring
     public CategoriaController(CategoriaRepository categoriaRepository) {
         this.categoriaRepository = categoriaRepository;
     }
 
-    // Rota GET /categorias -> Lista todas as categorias cadastradas.
+    // -------------------------------------------------------------------------
+    // 1. ROTA DE LISTAGEM DE CATEGORIAS
+    // Rota GET para "/categorias"
+    // -------------------------------------------------------------------------
     @GetMapping
     public String listarTodas(Model model) {
-        // Buscamos todas as categorias no banco e guardamos na variável "categorias" que o HTML consegue ler.
+        // Busca todas as categorias no banco de dados e adiciona no modelo para visualização do Thymeleaf
         model.addAttribute("categorias", categoriaRepository.findAll());
         
-        // Retorna a página que está na pasta src/main/resources/templates/categorias/listar.html
+        // Retorna a view em: src/main/resources/templates/categorias/listar.html
         return "categorias/listar";
     }
 
-    // Rota GET /categorias/nova -> Exibe a página com o formulário para criar uma categoria.
+    // -------------------------------------------------------------------------
+    // 2. ROTA PARA EXIBIR FORMULÁRIO DE NOVA CATEGORIA
+    // Rota GET para "/categorias/nova"
+    // -------------------------------------------------------------------------
     @GetMapping("/nova")
     public String exibirFormCriar(Model model) {
-        // Mandamos um objeto Categoria vazio para o HTML preencher com os dados digitados pelo usuário.
+        // Envia uma nova instância vazia de Categoria para ser populada pelo formulário th:object
         model.addAttribute("categoria", new Categoria());
         
-        // Abre o arquivo de formulário em templates/categorias/form-criar.html
+        // Retorna o HTML em: src/main/resources/templates/categorias/form-criar.html
         return "categorias/form-criar";
     }
 
-    // Rota POST /categorias -> Recebe os dados do formulário e tenta salvar a nova categoria no banco.
+    // -------------------------------------------------------------------------
+    // 3. ROTA PARA SALVAR A NOVA CATEGORIA
+    // Rota POST para "/categorias"
+    // -------------------------------------------------------------------------
     @PostMapping
     public String salvarNova(@Valid @ModelAttribute("categoria") Categoria categoria,
             BindingResult result) {
-        // Se houver algum erro de validação (ex: nome em branco), volta para a tela de criar categoria.
+        // @Valid: valida o objeto com base nas anotações da model (ex: @NotBlank)
+        // BindingResult: armazena os erros encontrados na validação dos campos do formulário
+        
+        // Se houver algum erro de validação (ex: nome menor que o mínimo de caracteres):
         if (result.hasErrors()) {
             return "categorias/form-criar";
         }
         
-        // Se já existir uma categoria com o mesmo nome, adiciona um erro personalizado na tela.
+        // Regra de negócio: verifica se já existe uma categoria no banco de dados com este nome
         if (categoriaRepository.existsByNome(categoria.getNome())) {
-            result.rejectValue("nome", "duplicate", "Ja existe uma categoria com esse nome.");
+            // Rejeita o valor do campo 'nome' e adiciona a mensagem de duplicidade
+            result.rejectValue("nome", "duplicate", "Já existe uma categoria cadastrada com esse nome.");
             return "categorias/form-criar";
         }
         
-        // Salva a nova categoria no banco de dados.
+        // Salva a categoria preenchida na tabela do banco
         categoriaRepository.save(categoria);
         
-        // Redireciona o usuário para a página de listagem.
+        // Redireciona para atualizar a listagem (/categorias) por GET
         return "redirect:/categorias";
     }
 
-    // Rota GET /categorias/{id} -> Exibe os detalhes de uma categoria específica.
+    // -------------------------------------------------------------------------
+    // 4. ROTA PARA VER DETALHES DE UMA CATEGORIA
+    // Rota GET para "/categorias/{id}"
+    // -------------------------------------------------------------------------
     @GetMapping("/{id}")
     public String detalhar(@PathVariable("id") Long id, Model model) {
-        // Buscamos a categoria usando o Optional, que serve para lidar com buscas que podem não achar nada.
+        // Busca a categoria pelo ID usando Optional para evitar retornos nulos
         Optional<Categoria> categoriaOptional = categoriaRepository.findById(id);
         
-        // Se a categoria foi encontrada
+        // Se a categoria foi localizada:
         if (categoriaOptional.isPresent()) {
             Categoria categoria = categoriaOptional.get();
-            // Mandamos a categoria encontrada para a tela HTML.
+            // Passa o objeto localizado para o Thymeleaf
             model.addAttribute("categoria", categoria);
             
-            // Abre a tela em templates/categorias/detalhar.html
+            // Retorna o HTML em: src/main/resources/templates/categorias/detalhar.html
             return "categorias/detalhar";
         } else {
-            // Se o ID não existe no banco, gera um erro.
+            // Lança uma exceção informando que o ID fornecido não é válido
             throw new IllegalArgumentException("ID invalido: " + id);
         }
     }
 
-    // Rota GET /categorias/{id}/editar -> Exibe o formulário de edição pré-preenchido.
+    // -------------------------------------------------------------------------
+    // 5. ROTA PARA EXIBIR FORMULÁRIO DE EDIÇÃO DE CATEGORIA
+    // Rota GET para "/categorias/{id}/editar"
+    // -------------------------------------------------------------------------
     @GetMapping("/{id}/editar")
     public String exibirFormEditar(@PathVariable("id") Long id, Model model) {
-        // Buscamos no banco usando o Optional.
+        // Carrega os dados existentes do banco pelo ID
         Optional<Categoria> categoriaOptional = categoriaRepository.findById(id);
         
-        // Se a categoria existe
         if (categoriaOptional.isPresent()) {
             Categoria categoria = categoriaOptional.get();
-            // Mandamos a categoria para a tela de edição preencher os campos.
+            // Mapeia os dados no formulário de edição
             model.addAttribute("categoria", categoria);
             
-            // Abre a tela em templates/categorias/form-editar.html
+            // Retorna a view em: src/main/resources/templates/categorias/form-editar.html
             return "categorias/form-editar";
         } else {
-            // Se o ID for inválido, dá erro.
             throw new IllegalArgumentException("ID invalido: " + id);
         }
     }
 
-    // Rota POST /categorias/{id} -> Recebe os dados alterados do formulário e atualiza a categoria.
+    // -------------------------------------------------------------------------
+    // 6. ROTA PARA SALVAR A ATUALIZAÇÃO DA CATEGORIA
+    // Rota POST para "/categorias/{id}"
+    // -------------------------------------------------------------------------
     @PostMapping("/{id}")
     public String atualizar(@PathVariable("id") Long id,
             @Valid @ModelAttribute("categoria") Categoria categoria,
             BindingResult result) {
-        // Se tiver erro de digitação/validação, volta para a tela de edição.
+        
+        // Se as edições do usuário gerarem erros de validação:
         if (result.hasErrors()) {
             return "categorias/form-editar";
         }
         
-        // Definimos o ID recebido no objeto para o Spring atualizar o registro certo no banco em vez de criar outro.
+        // Garante que o Spring atualize o registro com o ID correto e não crie uma nova categoria
         categoria.setId(id);
+        
+        // Executa o salvamento (UPDATE) do registro
         categoriaRepository.save(categoria);
         
-        // Volta para a listagem principal de categorias.
+        // Redireciona para a listagem atualizada de categorias
         return "redirect:/categorias";
     }
 
-    // Rota POST /categorias/{id}/excluir -> Exclui uma categoria do banco.
+    // -------------------------------------------------------------------------
+    // 7. ROTA PARA EXCLUIR UMA CATEGORIA
+    // Rota POST para "/categorias/{id}/excluir"
+    // -------------------------------------------------------------------------
     @PostMapping("/{id}/excluir")
     public String excluir(@PathVariable("id") Long id) {
-        // Buscamos no banco antes para garantir que a categoria existe.
+        // Busca a categoria antes da exclusão
         Optional<Categoria> categoriaOptional = categoriaRepository.findById(id);
         
-        // Se existir no banco, deletamos pelo ID.
         if (categoriaOptional.isPresent()) {
+            // Deleta o registro pelo ID
             categoriaRepository.deleteById(id);
-            // Volta para a lista de categorias.
+            // Retorna para a listagem
             return "redirect:/categorias";
         } else {
-            // Se o ID não existir, dá erro.
             throw new IllegalArgumentException("ID invalido: " + id);
         }
+        
+        /* 
+         * SE O PROFESSOR PEDIR PARA IMPEDIR A EXCLUSÃO CASO HAJA PRODUTOS NELA (Restrição de Integridade):
+         * Atualmente, se a categoria tiver jogos e você deletá-la, por cascade, os produtos podem sumir 
+         * ou gerar erro de chave estrangeira. Você pode impedir a exclusão manual assim:
+         * 
+         *    Categoria categoria = categoriaOptional.get();
+         *    if (categoria.getProdutos() != null && !categoria.getProdutos().isEmpty()) {
+         *        // Redireciona impedindo a exclusão e mostrando um parâmetro de erro
+         *        return "redirect:/categorias?erro=categoria-possui-produtos";
+         *    }
+         */
     }
 }
 

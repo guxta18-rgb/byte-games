@@ -1,11 +1,16 @@
 package loja.bytegames.controller;
 
+// Importação das classes de modelo e repositórios
 import loja.bytegames.model.Produto;
 import loja.bytegames.repository.ProdutoRepository;
+
+// Importações do Java Servlet e componentes do Spring Boot
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+// Coleções utilitárias do Java para manipulação de listas e mapas (carrinho de compras)
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,134 +18,183 @@ import java.util.Map;
 import java.util.Optional;
 
 /*
- * Este arquivo representa o Controlador da Loja (Vitrine e Carrinho).
- * Ele gerencia o que o cliente vê na página principal (vitrine), a busca de jogos,
- * e todo o funcionamento do carrinho de compras usando sessões do navegador.
+ * CONTEXTO DESTA CLASSE:
+ * Este é o Controlador da Loja (LojaController). Ele cuida da experiência pública do cliente:
+ * a página principal (vitrine), a funcionalidade de busca de produtos e toda a engrenagem do 
+ * carrinho de compras que utiliza a sessão do usuário (HttpSession) para guardar os jogos selecionados.
  */
 
-// A anotação @Controller indica que esta classe gerencia as telas da loja.
-@Controller
+@Controller // Registra como um controlador MVC
 public class LojaController {
 
-    // Gerenciador da tabela de produtos no banco.
+    // Repositório de produtos usado para buscar os dados para a vitrine e carrinho
     private final ProdutoRepository produtoRepository;
 
-    // Construtor: recebe o repository do Spring Boot.
+    // Construtor com injeção automática de dependência
     public LojaController(ProdutoRepository produtoRepository) {
         this.produtoRepository = produtoRepository;
     }
 
-    // Rota GET / -> É a página principal (vitrine) da loja.
-    // @RequestParam(search) serve para capturar o que o usuário digitou na barra de pesquisa (opcional).
+    // -------------------------------------------------------------------------
+    // 1. PÁGINA PRINCIPAL / VITRINE DA LOJA
+    // Rota GET para "/" (URL raiz do site)
+    // -------------------------------------------------------------------------
     @GetMapping("/")
     public String vitrine(@RequestParam(value = "search", required = false) String search, Model model) {
+        // @RequestParam(value = "search", required = false): Captura um parâmetro opcional na URL (ex: /?search=witcher)
+        
         List<Produto> listaProdutos;
 
-        // Se o usuário digitou algo na busca e não é apenas espaços em branco
+        // Se o usuário digitou algum texto na barra de busca:
         if (search != null && !search.trim().isEmpty()) {
-            // Buscamos no banco os produtos correspondentes
+            // Consulta o banco trazendo produtos cujo nome contenha o termo digitado (ignorando maiúsculas/minúsculas)
             listaProdutos = produtoRepository.findByNomeContainingIgnoreCase(search);
-            // Mandamos o termo buscado de volta para a tela para mostrar "Resultados para: ..."
+            // Envia o termo de busca de volta para o HTML (para mostrar "Resultados para: 'termo'")
             model.addAttribute("termoBuscado", search);
         } else {
-            // Se não buscou nada, trazemos todos os produtos cadastrados no banco.
+            // Caso contrário (sem busca ativa), traz todos os produtos cadastrados no banco
             listaProdutos = produtoRepository.findAll();
         }
 
-        // Mandamos a lista de produtos para o HTML vitrine.html
+        // Manda a lista de produtos (filtrada ou cheia) para renderização no HTML vitrine.html
         model.addAttribute("produtos", listaProdutos);
+        
+        // Retorna a view em: src/main/resources/templates/loja/vitrine.html
         return "loja/vitrine";
     }
 
-    // Rota POST /carrinho/adicionar -> Adiciona um jogo na sacola de compras.
-    // HttpSession serve para guardar os produtos que o cliente escolheu enquanto navega no site.
+    // -------------------------------------------------------------------------
+    // 2. ADICIONAR PRODUTO AO CARRINHO DE COMPRAS
+    // Rota POST para "/carrinho/adicionar" (envio seguro via formulário)
+    // -------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     @PostMapping("/carrinho/adicionar")
     public String adicionarAoCarrinho(@RequestParam("produtoId") Long produtoId, HttpSession session) {
+        // @RequestParam("produtoId"): Captura o ID do produto enviado pelo botão da vitrine
+        // HttpSession: Representa a sessão do navegador do cliente. Guarda dados temporários na memória do servidor
 
-        // Pegamos o carrinho atual da sessão do usuário.
-        // O carrinho guarda o ID do produto (Long) e a quantidade escolhida (Integer).
+        // Recupera o mapa do carrinho de compras atualmente salvo na sessão
+        // O mapa associa o ID do Produto (Long) com a quantidade adicionada (Integer)
         Map<Long, Integer> carrinho = (Map<Long, Integer>) session.getAttribute("carrinho");
         
-        // Se ainda não existir um carrinho na sessão do usuário, criamos um novo mapa vazio.
+        // Se a sessão for nova e o carrinho ainda não existir, criamos um mapa vazio
         if (carrinho == null) {
             carrinho = new HashMap<>();
         }
 
-        // --- Simplificação iniciante do getOrDefault ---
-        // Verificamos se o produto já estava no carrinho. 
-        // Se sim, pegamos a quantidade antiga. Se não, a quantidade começa em zero.
+        // Recupera a quantidade atual do produto no carrinho de forma simples para iniciantes
         int quantidadeAtual = 0;
         if (carrinho.containsKey(produtoId)) {
             quantidadeAtual = carrinho.get(produtoId);
         }
         
-        // Adicionamos mais 1 na quantidade e salvamos de volta no mapa do carrinho.
+        // Incrementa em 1 a quantidade e insere/atualiza no mapa do carrinho
         int novaQuantidade = quantidadeAtual + 1;
         carrinho.put(produtoId, novaQuantidade);
 
-        // Guardamos o carrinho atualizado de volta na sessão do usuário.
+        // Atualiza a variável na sessão com o carrinho modificado
         session.setAttribute("carrinho", carrinho);
 
-        // Redireciona o usuário para a tela do carrinho para exibir o resultado.
+        // Redireciona o navegador do usuário para abrir a rota GET "/carrinho"
         return "redirect:/carrinho";
     }
 
-    // Rota GET /carrinho -> Exibe os produtos adicionados na sacola de compras.
+    // -------------------------------------------------------------------------
+    // 3. EXIBIR A TELA DO CARRINHO DE COMPRAS
+    // Rota GET para "/carrinho"
+    // -------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     @GetMapping("/carrinho")
     public String exibirCarrinho(HttpSession session, Model model) {
-        // Buscamos o carrinho na sessão do usuário.
+        // Recupera o carrinho (ID -> Quantidade) armazenado na sessão do cliente
         Map<Long, Integer> carrinhoSessao = (Map<Long, Integer>) session.getAttribute("carrinho");
 
-        // Criamos uma lista de mapas para montar as linhas da tabela no HTML.
-        // Cada item terá: o produto completo, a quantidade e o subtotal (preco * quantidade).
+        // Lista de mapas estruturados que guardará cada item do carrinho com todos os seus detalhes no HTML
         List<Map<String, Object>> itensCarrinho = new ArrayList<>();
         double totalGeral = 0.0;
 
-        // Se o carrinho existir e tiver itens
+        // Se a sessão possui um carrinho ativo:
         if (carrinhoSessao != null) {
-            // Percorremos cada item que está guardado no carrinho
+            // Percorre cada entrada (par ID e quantidade)
             for (Map.Entry<Long, Integer> item : carrinhoSessao.entrySet()) {
                 
-                // --- Simplificação iniciante do orElse ---
-                // Buscamos o produto no banco de dados.
+                // Busca o produto correspondente no banco de dados
                 Optional<Produto> produtoOptional = produtoRepository.findById(item.getKey());
                 Produto prod = null;
                 if (produtoOptional.isPresent()) {
                     prod = produtoOptional.get();
                 }
                 
-                // Se o produto existir de verdade no banco
+                // Se o produto foi encontrado no banco de dados de fato:
                 if (prod != null) {
                     Map<String, Object> linha = new HashMap<>();
                     
-                    // Calculamos o subtotal: preço unitário multiplicado pela quantidade de itens.
+                    // Calcula o subtotal deste item: Preço Unitário * Quantidade
                     double subtotal = prod.getPreco().doubleValue() * item.getValue();
-                    totalGeral += subtotal;
+                    totalGeral += subtotal; // Soma ao total geral do carrinho
 
-                    // Colocamos as informações estruturadas na linha
+                    // Estrutura os dados para exibição simplificada no Thymeleaf
                     linha.put("produto", prod);
                     linha.put("quantidade", item.getValue());
                     linha.put("subtotal", subtotal);
                     
-                    // Adicionamos a linha à lista de itens do carrinho
+                    // Adiciona o item formatado na lista final
                     itensCarrinho.add(linha);
                 }
             }
         }
 
-        // Enviamos a lista de itens estruturados e o total geral para a tela do carrinho.
+        // Manda os dados estruturados e o total geral calculados para renderizar na view
         model.addAttribute("itens", itensCarrinho);
         model.addAttribute("totalGeral", totalGeral);
+        
+        // Retorna a view em: src/main/resources/templates/loja/carrinho.html
         return "loja/carrinho";
     }
 
-    // Rota POST /carrinho/limpar -> Esvazia a sacola de compras.
+    // -------------------------------------------------------------------------
+    // 4. LIMPAR CARRINHO DE COMPRAS
+    // Rota POST para "/carrinho/limpar"
+    // -------------------------------------------------------------------------
     @PostMapping("/carrinho/limpar")
     public String limparCarrinho(HttpSession session) {
-        // Remove o carrinho inteiro da sessão do usuário.
+        // Remove completamente o atributo do carrinho da sessão
         session.removeAttribute("carrinho");
+        
+        // Redireciona para atualizar a tela do carrinho vazia
         return "redirect:/carrinho";
+        
+        /* 
+         * SE O PROFESSOR PEDIR PARA REMOVER APENAS UM JOGO ESPECÍFICO DO CARRINHO (Botão Remover Item):
+         * Crie uma nova rota POST:
+         * 
+         *    @PostMapping("/carrinho/remover")
+         *    public String removerItem(@RequestParam("produtoId") Long produtoId, HttpSession session) {
+         *        Map<Long, Integer> carrinho = (Map<Long, Integer>) session.getAttribute("carrinho");
+         *        if (carrinho != null) {
+         *            carrinho.remove(produtoId); // Remove do mapa usando a chave do ID do produto
+         *            session.setAttribute("carrinho", carrinho);
+         *        }
+         *        return "redirect:/carrinho";
+         *    }
+         * 
+         * SE O PROFESSOR PEDIR PARA IMPLEMENTAR A COMPRA / CHECKOUT (com redução de estoque):
+         * Crie uma rota POST que lê o carrinho, desconta o estoque de cada produto no banco de dados e limpa a sessão:
+         * 
+         *    @PostMapping("/carrinho/checkout")
+         *    public String checkout(HttpSession session) {
+         *        Map<Long, Integer> carrinho = (Map<Long, Integer>) session.getAttribute("carrinho");
+         *        if (carrinho != null) {
+         *            for (Map.Entry<Long, Integer> item : carrinho.entrySet()) {
+         *                Produto prod = produtoRepository.findById(item.getKey()).orElseThrow();
+         *                // Reduz a quantidade comprada do estoque
+         *                prod.setEstoque(prod.getEstoque() - item.getValue());
+         *                produtoRepository.save(prod); // Atualiza o banco
+         *            }
+         *            session.removeAttribute("carrinho"); // Limpa o carrinho
+         *        }
+         *        return "redirect:/?sucesso=compra-realizada";
+         *    }
+         */
     }
 }

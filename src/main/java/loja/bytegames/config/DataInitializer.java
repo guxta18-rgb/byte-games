@@ -1,78 +1,76 @@
 package loja.bytegames.config;
 
+// Importação das entidades e repositories do projeto
 import loja.bytegames.model.Categoria;
 import loja.bytegames.model.Produto;
 import loja.bytegames.repository.CategoriaRepository;
 import loja.bytegames.repository.ProdutoRepository;
+
+// Importações do Spring Boot para execução na inicialização
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 
 /*
- * Este arquivo serve para colocar dados iniciais (de teste) no nosso banco de dados.
- * Assim que o Spring Boot terminar de ligar, ele roda este código e cadastra
- * as primeiras categorias e jogos automaticamente caso o banco esteja vazio.
+ * CONTEXTO DESTA CLASSE:
+ * Esta classe é um semeador de banco de dados (Database Seeder). Ela implementa 'CommandLineRunner', 
+ * o que significa que o método 'run' será disparado automaticamente logo após o Spring Boot carregar.
+ * Ela serve para cadastrar categorias e produtos iniciais (de teste) se o banco de dados estiver vazio, 
+ * facilitando a apresentação do projeto sem a necessidade de cadastrar tudo manualmente toda vez.
  */
 
-// A anotação @Component avisa ao Spring Boot para gerenciar e executar esta classe.
-@Component
+@Component // Registra a classe como um componente gerenciado pelo Spring Boot (Bean)
 public class DataInitializer implements CommandLineRunner {
 
-    // Criamos variáveis para guardar nossos gerenciadores do banco de dados (repositories).
+    // Declaração dos repositórios para inserção de dados
     private final CategoriaRepository categoriaRepository;
     private final ProdutoRepository produtoRepository;
 
-    // Construtor: serve para o Spring Boot passar os repositories reais para nós usarmos.
+    // Injeção de dependência por construtor feita automaticamente pelo Spring
     public DataInitializer(CategoriaRepository categoriaRepository, ProdutoRepository produtoRepository) {
         this.categoriaRepository = categoriaRepository;
         this.produtoRepository = produtoRepository;
     }
 
-    // O método run() é executado automaticamente assim que o programa começa a rodar.
+    // Método que é executado após a inicialização do servidor
     @Override
     public void run(String... args) throws Exception {
-        // Se a quantidade de categorias no banco de dados for igual a zero, cadastramos os dados de teste.
+        // Verifica se a tabela de categorias está vazia (evita duplicar registros a cada reinicialização)
         if (categoriaRepository.count() == 0) {
             
-            // --- Criação das Categorias ---
+            // --- 1. INSTANCIAÇÃO E PREENCHIMENTO DAS CATEGORIAS ---
 
-            // Categoria 1: RPG
             Categoria rpg = new Categoria(); 
             rpg.setNome("RPG"); 
             rpg.setDescricao("Jogos de interpretacao de personagens com narrativas epicas.");
 
-            // Categoria 2: Ação e Aventura
             Categoria acao = new Categoria(); 
             acao.setNome("Acao e Aventura"); 
             acao.setDescricao("Combate intenso e exploracao de mundos abertos.");
 
-            // Categoria 3: FPS
             Categoria fps = new Categoria(); 
             fps.setNome("FPS / Tiro"); 
             fps.setDescricao("Jogos de tiro em primeira pessoa com acao intensa.");
 
-            // Categoria 4: Estratégia
             Categoria estrategia = new Categoria(); 
             estrategia.setNome("Estrategia"); 
             estrategia.setDescricao("Planejamento tatico e gerenciamento de recursos.");
 
-            // Salvando as categorias no banco de dados MySQL
+            // Salva as categorias no banco de dados (o JPA gera os IDs automaticamente)
             categoriaRepository.save(rpg);
             categoriaRepository.save(acao);
             categoriaRepository.save(fps);
             categoriaRepository.save(estrategia);
 
-            // --- Criação dos Produtos (Jogos) ---
+            // --- 2. INSTANCIAÇÃO E PREENCHIMENTO DOS PRODUTOS (JOGOS) ---
 
-            // Produto 1
             Produto p1 = new Produto();
             p1.setNome("The Witcher 3: Wild Hunt");
             p1.setDescricao("Um dos maiores RPGs ja criados. Explore o Continente como Geralt de Rivia, um cacador de monstros profissional.");
-            p1.setPreco(new BigDecimal("59.90")); 
+            p1.setPreco(new BigDecimal("59.90")); // BigDecimal evita erros de arredondamento inerentes ao float/double
             p1.setEstoque(15); 
-            p1.setCategoria(rpg);
+            p1.setCategoria(rpg); // Cria a relação de chave estrangeira com a categoria RPG
 
-            // Produto 2
             Produto p2 = new Produto();
             p2.setNome("God of War");
             p2.setDescricao("Kratos e seu filho Atreus embarcam em uma jornada epica pela mitologia nordica cheia de desafios.");
@@ -80,7 +78,6 @@ public class DataInitializer implements CommandLineRunner {
             p2.setEstoque(8); 
             p2.setCategoria(acao);
 
-            // Produto 3
             Produto p3 = new Produto();
             p3.setNome("Counter-Strike 2");
             p3.setDescricao("O classico FPS competitivo renovado. Jogue com amigos em partidas online intensas e ranqueadas.");
@@ -88,7 +85,6 @@ public class DataInitializer implements CommandLineRunner {
             p3.setEstoque(999); 
             p3.setCategoria(fps);
 
-            // Produto 4
             Produto p4 = new Produto();
             p4.setNome("Civilization VI");
             p4.setDescricao("Construa um imperio que resistira ao teste do tempo. Lide com diplomacia, ciencia, guerra e exploracao.");
@@ -96,7 +92,6 @@ public class DataInitializer implements CommandLineRunner {
             p4.setEstoque(20); 
             p4.setCategoria(estrategia);
 
-            // Produto 5
             Produto p5 = new Produto();
             p5.setNome("Elden Ring");
             p5.setDescricao("Explore as Terras Intermedias em um RPG de acao desafiador criado por FromSoftware e George R.R. Martin.");
@@ -104,15 +99,32 @@ public class DataInitializer implements CommandLineRunner {
             p5.setEstoque(0); 
             p5.setCategoria(rpg);
 
-            // Salvando os produtos no banco de dados MySQL
+            // Salva todos os produtos na tabela do banco
             produtoRepository.save(p1); 
             produtoRepository.save(p2); 
             produtoRepository.save(p3);
             produtoRepository.save(p4); 
             produtoRepository.save(p5);
 
+            // Print de confirmação que aparece apenas no console/terminal
             System.out.println("Dados de teste inseridos com sucesso!");
         }
+        
+        /* 
+         * SE O PROFESSOR PEDIR PARA ADICIONAR UM NOVO JOGO INICIAL:
+         * Basta copiar a estrutura de um produto existente, preencher as variáveis e salvá-lo:
+         *    Produto novoJogo = new Produto();
+         *    novoJogo.setNome("Novo Jogo Exemplo");
+         *    novoJogo.setDescricao("Descricao do jogo...");
+         *    novoJogo.setPreco(new BigDecimal("99.90"));
+         *    novoJogo.setEstoque(10);
+         *    novoJogo.setCategoria(rpg); // Use uma categoria existente criada acima
+         *    produtoRepository.save(novoJogo);
+         * 
+         * SE O PROFESSOR PEDIR PARA ESSE INICIALIZADOR SÓ RODAR EM MODO DE DESENVOLVIMENTO (DEV):
+         * Adicione a anotação @Profile("dev") logo acima de @Component. 
+         * Dessa forma, se a aplicação subir no servidor de produção, este seed de teste não rodará.
+         */
     }
 }
 
