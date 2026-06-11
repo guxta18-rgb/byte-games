@@ -28,32 +28,36 @@ class BytegamesDatabaseTests {
         System.out.println("🚀 INICIANDO FLUXO DE VALIDAÇÃO DE CONEXÃO E CRUD MYSQL");
         System.out.println("=======================================================");
 
-        // 0. Preparação: Garantir categoria para o produto
+        // 0. Preparação: Garantir categoria para o produto usando query explícita
         System.out.println("\n⚙️ [PREPARAÇÃO] Criando categoria de teste...");
-        Categoria categoria = new Categoria();
-        categoria.setNome("Categoria Temp Teste");
-        categoria.setDescricao("Categoria temporária para testes automatizados");
-        categoria = categoriaRepository.save(categoria);
+        categoriaRepository.inserirCategoria("Categoria Temp Teste", "Categoria temporária para testes automatizados");
+        
+        Categoria categoria = categoriaRepository.buscarCategoriaPorNome("Categoria Temp Teste")
+                .orElseThrow(() -> new AssertionError("Categoria de teste deveria ter sido inserida e encontrada."));
         assertNotNull(categoria.getId(), "Categoria deveria ter um ID gerado pelo banco.");
         System.out.println("✅ Categoria criada com sucesso no MySQL! ID: " + categoria.getId());
 
-        // 1. CREATE (Insert)
+        // 1. CREATE (Insert usando query explícita)
         System.out.println("\n➕ [1. CREATE] Cadastrando produto fictício...");
-        Produto novoProduto = new Produto();
-        novoProduto.setNome("Jogo Teste Automatizado");
-        novoProduto.setDescricao("Um produto temporário inserido para validar a conexão do banco de dados Byteloja");
-        novoProduto.setPreco(new BigDecimal("99.99"));
-        novoProduto.setEstoque(5);
-        novoProduto.setCategoria(categoria);
+        produtoRepository.inserirProduto(
+                "Jogo Teste Automatizado",
+                "Um produto temporário inserido para validar a conexão do banco de dados Byteloja",
+                new BigDecimal("99.99"),
+                5,
+                categoria.getId(),
+                null
+        );
 
-        novoProduto = produtoRepository.save(novoProduto);
+        Produto novoProduto = produtoRepository.findByNomeContainingIgnoreCase("Jogo Teste Automatizado")
+                .stream().findFirst()
+                .orElseThrow(() -> new AssertionError("O produto deveria ter sido inserido e encontrado."));
         Long produtoId = novoProduto.getId();
         assertNotNull(produtoId, "O produto deveria ter um ID gerado pelo banco.");
         System.out.println("✅ Produto cadastrado com sucesso no MySQL! ID: " + produtoId);
 
-        // 2. READ (Select)
+        // 2. READ (Select usando query explícita)
         System.out.println("\n🔍 [2. READ] Buscando o produto recém-criado...");
-        Optional<Produto> produtoBuscadoOpt = produtoRepository.findById(produtoId);
+        Optional<Produto> produtoBuscadoOpt = produtoRepository.buscarProdutoPorId(produtoId);
         assertTrue(produtoBuscadoOpt.isPresent(), "O produto deveria ter sido encontrado no banco.");
         
         Produto produtoBuscado = produtoBuscadoOpt.get();
@@ -62,26 +66,40 @@ class BytegamesDatabaseTests {
         System.out.println("   👉 Preço original: R$ " + produtoBuscado.getPreco());
         System.out.println("   👉 Estoque: " + produtoBuscado.getEstoque());
 
-        // 3. UPDATE (Alterar preço)
+        // 3. UPDATE (Alterar preço usando query explícita)
         System.out.println("\n🔄 [3. UPDATE] Atualizando o preço do produto...");
         BigDecimal novoPreco = new BigDecimal("129.90");
-        produtoBuscado.setPreco(novoPreco);
-        produtoBuscado = produtoRepository.save(produtoBuscado);
         
-        assertEquals(novoPreco, produtoBuscado.getPreco(), "O preço deveria ter sido atualizado para 129.90.");
+        produtoRepository.atualizarProduto(
+                produtoId,
+                produtoBuscado.getNome(),
+                produtoBuscado.getDescricao(),
+                novoPreco,
+                produtoBuscado.getEstoque(),
+                categoria.getId(),
+                produtoBuscado.getImagem()
+        );
+        
+        Produto produtoAtualizado = produtoRepository.buscarProdutoPorId(produtoId)
+                .orElseThrow(() -> new AssertionError("O produto deveria existir após atualização."));
+        
+        assertEquals(novoPreco, produtoAtualizado.getPreco(), "O preço deveria ter sido atualizado para 129.90.");
         System.out.println("✅ Preço do produto atualizado com sucesso no MySQL!");
-        System.out.println("   👉 Novo Preço: R$ " + produtoBuscado.getPreco());
+        System.out.println("   👉 Novo Preço: R$ " + produtoAtualizado.getPreco());
 
-        // 4. DELETE (Remover do banco)
+        // 4. DELETE (Remover do banco usando query explícita)
         System.out.println("\n❌ [4. DELETE] Removendo o produto de teste...");
-        produtoRepository.deleteById(produtoId);
+        produtoRepository.deletarProdutoPorId(produtoId);
         
-        Optional<Produto> produtoDeletadoOpt = produtoRepository.findById(produtoId);
+        Optional<Produto> produtoDeletadoOpt = produtoRepository.buscarProdutoPorId(produtoId);
         assertFalse(produtoDeletadoOpt.isPresent(), "O produto não deveria mais existir no banco.");
         System.out.println("✅ Produto removido com sucesso do MySQL!");
 
-        // Limpeza da categoria temporária
-        categoriaRepository.deleteById(categoria.getId());
+        // Limpeza da categoria temporária usando query explícita
+        categoriaRepository.deletarCategoriaPorId(categoria.getId());
+        
+        Optional<Categoria> categoriaDeletadaOpt = categoriaRepository.buscarCategoriaPorId(categoria.getId());
+        assertFalse(categoriaDeletadaOpt.isPresent(), "A categoria não deveria mais existir no banco.");
         System.out.println("🧹 Categoria temporária limpa com sucesso!");
 
         System.out.println("\n=======================================================");

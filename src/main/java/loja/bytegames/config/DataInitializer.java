@@ -109,22 +109,6 @@ public class DataInitializer implements CommandLineRunner {
             // Print de confirmação que aparece apenas no console/terminal
             System.out.println("Dados de teste inseridos com sucesso!");
         }
-        
-        /* 
-         * SE O PROFESSOR PEDIR PARA ADICIONAR UM NOVO JOGO INICIAL:
-         * Basta copiar a estrutura de um produto existente, preencher as variáveis e salvá-lo:
-         *    Produto novoJogo = new Produto();
-         *    novoJogo.setNome("Novo Jogo Exemplo");
-         *    novoJogo.setDescricao("Descricao do jogo...");
-         *    novoJogo.setPreco(new BigDecimal("99.90"));
-         *    novoJogo.setEstoque(10);
-         *    novoJogo.setCategoria(rpg); // Use uma categoria existente criada acima
-         *    produtoRepository.save(novoJogo);
-         * 
-         * SE O PROFESSOR PEDIR PARA ESSE INICIALIZADOR SÓ RODAR EM MODO DE DESENVOLVIMENTO (DEV):
-         * Adicione a anotação @Profile("dev") logo acima de @Component. 
-         * Dessa forma, se a aplicação subir no servidor de produção, este seed de teste não rodará.
-         */
     }
 }
 

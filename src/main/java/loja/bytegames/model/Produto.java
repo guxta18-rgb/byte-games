@@ -65,6 +65,10 @@ public class Produto {
     @NotNull(message = "Selecione uma categoria válida!")
     private Categoria categoria;
 
+    // Caminho ou nome do arquivo da imagem do produto salva no MySQL
+    @Column(nullable = true, length = 255)
+    private String imagem;
+
     // Construtor vazio: Requisito fundamental do Hibernate/JPA para converter registros do banco em instâncias Java
     public Produto() {
     }
@@ -119,16 +123,12 @@ public class Produto {
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
     }
-    
-    /* 
-     * SE O PROFESSOR PERGUNTAR POR QUE USAMOS 'BigDecimal' PARA O PREÇO E NÃO 'double' OU 'float':
-     * Double e float são tipos de ponto flutuante binário que podem sofrer com pequenas imprecisões e erros 
-     * de arredondamento em cálculos matemáticos (ex: 0.1 + 0.2 resultar em 0.30000000000000004). Para valores 
-     * monetários, isso é inaceitável. O BigDecimal oferece controle total de precisão e arredondamento decimal, 
-     * garantindo exatidão absoluta nas contas.
-     * 
-     * SE O PROFESSOR PEDIR PARA ADICIONAR UMA NOVA VALIDAÇÃO (ex: desconto máximo de preço, ou limite de estoque):
-     * Você pode adicionar anotações como:
-     *    @Max(value = 1000, message = "O estoque não pode ultrapassar 1000 unidades.")
-     */
+
+    public String getImagem() {
+        return imagem;
+    }
+
+    public void setImagem(String imagem) {
+        this.imagem = imagem;
+    }
 }

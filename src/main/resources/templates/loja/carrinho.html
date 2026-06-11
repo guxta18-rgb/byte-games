@@ -36,8 +36,13 @@
                 <tbody>
                     <tr th:each="item : ${itens}">
                         <td>
-                            <strong th:text="${item.produto.nome}" style="color: var(--text-primary);"></strong>
-                            <small th:text="${item.produto.categoria.nome}" style="display: block; color: var(--purple); font-size: 11px; margin-top: 2px;"></small>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <img th:src="${item.produto.imagem != null && !item.produto.imagem.empty} ? @{/uploads/{img}(img=${item.produto.imagem})} : @{/img/default-game.png}" class="produto-thumb" alt="Miniatura do produto" />
+                                <div>
+                                    <strong th:text="${item.produto.nome}" style="color: var(--text-primary); display: block;"></strong>
+                                    <small th:text="${item.produto.categoria.nome}" style="display: block; color: var(--purple); font-size: 11px; margin-top: 2px;"></small>
+                                </div>
+                            </div>
                         </td>
                         <td th:text="${'R$ ' + #numbers.formatDecimal(item.produto.preco, 1, 'POINT', 2, 'COMMA')}" style="color: var(--text-secondary);"></td>
                         <td style="text-align: center;">

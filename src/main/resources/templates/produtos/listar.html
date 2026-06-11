@@ -28,6 +28,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Imagem</th>
                         <th>Nome do Jogo</th>
                         <th>Categoria</th>
                         <th>Preço</th>
@@ -38,6 +39,9 @@
                 <tbody>
                     <tr th:each="prod : ${produtos}">
                         <td style="color: var(--text-muted);" th:text="${prod.id}">1</td>
+                        <td>
+                            <img th:src="${prod.imagem != null && !prod.imagem.empty} ? @{/uploads/{img}(img=${prod.imagem})} : @{/img/default-game.png}" class="produto-thumb" alt="Miniatura do jogo" />
+                        </td>
                         <td>
                             <span th:text="${prod.nome}" style="font-weight: 600; display: block; color: var(--text-primary);">Nome</span>
                             <small th:text="${#strings.abbreviate(prod.descricao, 60)}" style="color: var(--text-muted); font-size: 12px;"></small>
@@ -59,7 +63,7 @@
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(produtos)}">
-                        <td colspan="6" class="empty-state"><p>Nenhum produto cadastrado.</p></td>
+                        <td colspan="7" class="empty-state"><p>Nenhum produto cadastrado.</p></td>
                     </tr>
                 </tbody>
             </table>

@@ -84,16 +84,5 @@ public class Categoria {
     public void setProdutos(List<Produto> produtos) {
         this.produtos = produtos;
     }
-    
-    /* 
-     * SE O PROFESSOR PERGUNTAR QUAL A DIFERENÇA ENTRE LAZY E EAGER FETCH:
-     * - LAZY (preguiçoso): Só carrega a lista de produtos do banco de dados quando você chamar 
-     *   explicitamente "categoria.getProdutos()". É excelente para performance.
-     * - EAGER (ansioso): Traz os produtos do banco automaticamente no momento em que busca a categoria, 
-     *   mesmo que você nunca os use no código. Pode deixar o app lento se houver muitos registros.
-     * 
-     * SE O PROFESSOR PEDIR PARA MUDAR O CASCADE PARA NÃO EXCLUIR OS PRODUTOS SE DELETAR A CATEGORIA:
-     * Mude o cascade de 'CascadeType.ALL' para apenas 'CascadeType.PERSIST' ou 'CascadeType.MERGE'.
-     */
 }
 

@@ -36,9 +36,14 @@
         <div class="grid-produtos">
             <div class="card-produto" th:each="prod : ${produtos}">
                 <div>
-                    <span class="badge-categoria" th:text="${prod.categoria.nome}"></span>
-                    <h4 th:text="${prod.nome}"></h4>
-                    <p th:text="${#strings.abbreviate(prod.descricao, 100)}" style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;"></p>
+                    <a th:href="@{/produto/{id}(id=${prod.id})}" style="text-decoration: none; color: inherit; display: block; cursor: pointer;">
+                        <div class="card-produto-imagem">
+                            <img th:src="${prod.imagem != null && !prod.imagem.empty} ? @{/uploads/{img}(img=${prod.imagem})} : @{/img/default-game.png}" alt="Imagem do Jogo" />
+                        </div>
+                        <span class="badge-categoria" th:text="${prod.categoria.nome}"></span>
+                        <h4 th:text="${prod.nome}"></h4>
+                    </a>
+                    <p th:text="${#strings.abbreviate(prod.descricao, 100)}" style="color: var(--text-secondary); font-size: 13px; line-height: 1.5; margin-top: 8px;"></p>
                 </div>
                 <div>
                     <div class="preco-tag" th:text="${'R$ ' + #numbers.formatDecimal(prod.preco, 1, 'POINT', 2, 'COMMA')}"></div>
