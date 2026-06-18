@@ -1,60 +1,54 @@
 package loja.bytegames.repository;
 
-import loja.bytegames.model.Categoria;
+import loja.bytegames.Categoria;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-
+// @Repository indica que esta interface faz acesso e gravação no banco de dados
 @Repository
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 
-    // O Spring Data cria essa validação automaticamente pelo nome do método!
+    // Método que verifica se já existe uma categoria com determinado nome
     boolean existsByNome(String nome);
 
-    // O Spring Data cria essa busca automaticamente pelo nome do método!
+    // Método que busca categoria pelo nome exato
     Optional<Categoria> findByNome(String nome);
 
-    // --- Métodos de compatibilidade (para não quebrar o código existente) ---
-
-    // Busca a categoria por nome usando o método automático do Spring Data
+    // Método padrão para buscar categoria por nome
     default Optional<Categoria> buscarCategoriaPorNome(String nome) {
         return findByNome(nome);
     }
 
-    // Retorna todas as categorias usando o findAll() que já vem pronto no
-    // JpaRepository
+    // Método padrão para listar todas as categorias do banco
     default List<Categoria> buscarTodasCategorias() {
         return findAll();
     }
 
-    // Busca a categoria pelo ID usando o findById(id) que já vem pronto no
-    // JpaRepository
+    // Método padrão para buscar uma categoria pelo ID
     default Optional<Categoria> buscarCategoriaPorId(Long id) {
         return findById(id);
     }
 
-    // Insere uma nova categoria criando o objeto Categoria e usando o save()
+    // Método personalizado para inserir uma nova categoria
     default void inserirCategoria(String nome, String descricao) {
         Categoria categoria = new Categoria();
         categoria.setNome(nome);
         categoria.setDescricao(descricao);
-        save(categoria); // O save() insere automaticamente no banco de dados!
+        save(categoria);
     }
 
-    // Atualiza uma categoria existente buscando por ID e salvando com save()
+    // Método personalizado para atualizar dados de uma categoria existente
     default void atualizarCategoria(Long id, String nome, String descricao) {
         findById(id).ifPresent(categoria -> {
             categoria.setNome(nome);
             categoria.setDescricao(descricao);
-            save(categoria); // O save() atualiza o registro existente porque ele já possui um ID!
+            save(categoria);
         });
     }
 
-    // Deleta uma categoria pelo ID usando o deleteById(id) que já vem pronto no
-    // JpaRepository
+    // Método padrão para deletar uma categoria pelo ID
     default void deletarCategoriaPorId(Long id) {
         deleteById(id);
     }

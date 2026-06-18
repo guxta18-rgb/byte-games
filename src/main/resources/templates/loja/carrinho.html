@@ -12,6 +12,7 @@
             <a href="/" class="btn btn-secundario btn-sm">← Continuar Comprando</a>
             <a href="/produtos" class="btn btn-secundario btn-sm">⚙️ Produtos</a>
             <a href="/categorias" class="btn btn-secundario btn-sm">📂 Categorias</a>
+            <a href="/faq" class="btn btn-secundario btn-sm">💬 FAQ</a>
         </div>
     </nav>
 
@@ -36,12 +37,9 @@
                 <tbody>
                     <tr th:each="item : ${itens}">
                         <td>
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <img th:src="${item.produto.imagem != null && !item.produto.imagem.empty} ? @{/uploads/{img}(img=${item.produto.imagem})} : @{/img/default-game.png}" class="produto-thumb" alt="Miniatura do produto" />
-                                <div>
-                                    <strong th:text="${item.produto.nome}" style="color: var(--text-primary); display: block;"></strong>
-                                    <small th:text="${item.produto.categoria.nome}" style="display: block; color: var(--purple); font-size: 11px; margin-top: 2px;"></small>
-                                </div>
+                            <div>
+                                <strong th:text="${item.produto.nome}" style="color: var(--text-primary); display: block;"></strong>
+                                <small th:text="${item.produto.categoria.nome}" style="display: block; color: var(--purple); font-size: 11px; margin-top: 2px;"></small>
                             </div>
                         </td>
                         <td th:text="${'R$ ' + #numbers.formatDecimal(item.produto.preco, 1, 'POINT', 2, 'COMMA')}" style="color: var(--text-secondary);"></td>

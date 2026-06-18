@@ -2,59 +2,68 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>ByteGames - Painel Administrativo</title>
+    <title>ByteGames - Admin Produtos</title>
     <link rel="stylesheet" th:href="@{/css/estilo.css}">
 </head>
 <body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">BYTE<span>GAMES</span></a>
+        <div class="navbar-links">
+            <a href="/" class="btn btn-secundario btn-sm">🛒 Loja</a>
+            <a href="/categorias" class="btn btn-secundario btn-sm">📂 Categorias</a>
+        </div>
+    </nav>
 
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <h1>🎮 ByteGames - Painel Administrativo</h1>
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">🎮 Gerenciar Produtos</h1>
+                <p class="page-subtitle">Painel administrative de jogos</p>
+            </div>
             <a href="/produtos/novo" class="btn btn-principal">+ Cadastrar Novo Jogo</a>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nome do Jogo</th>
-                    <th>Categoria</th>
-                    <th>Preço</th>
-                    <th>Estoque</th>
-                    <th style="text-align: center;">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="prod : ${produtos}">
-                    <td th:text="${prod.id}">1</td>
-                    <td>
-                        <span th:text="${prod.nome}" style="font-weight: bold; display: block; color: #fff;">Nome</span>
-                        <small th:text="${prod.descricao}" style="color: #a8a8b3; font-size: 12px;"></small>
-                    </td>
-                    <td th:text="${prod.categoria.nome}">Categoria</td>
-                    <td th:text="${'R$ ' + prod.preco}">R$ 0.00</td>
-                    <td>
-                        <span th:text="${prod.estoque}" 
-                              th:class="${prod.estoque == 0} ? 'badge bg-perigo' : 'badge bg-sucesso'">0</span>
-                    </td>
-                    <td style="text-align: center;">
-                        <div style="display: flex; gap: 8px; justify-content: center;">
-                            <a th:href="@{/produtos/{id}(id=${prod.id})}" class="btn btn-info" style="padding: 5px 10px;">Ver</a>
-                            <a th:href="@{/produtos/{id}/editar(id=${prod.id})}" class="btn btn-secundario" style="padding: 5px 10px;">Editar</a>
-                            
-                            <form th:action="@{/produtos/{id}/excluir(id=${prod.id})}" method="post" 
-                                  onsubmit="return confirm('Excluir este jogo permanentemente?');" style="display: inline;">
-                                <button type="submit" class="btn btn-danger" style="padding: 5px 10px;">Excluir</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(produtos)}">
-                    <td colspan="6" style="text-align: center; color: #a8a8b3; padding: 30px;">Nenhum jogo cadastrado no sistema.</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome do Jogo</th>
+                        <th>Categoria</th>
+                        <th>Preço</th>
+                        <th>Estoque</th>
+                        <th style="text-align: center;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="prod : ${produtos}">
+                        <td style="color: var(--text-muted);" th:text="${prod.id}">1</td>
+                        <td>
+                            <span th:text="${prod.nome}" style="font-weight: 600; display: block; color: var(--text-primary);">Nome</span>
+                            <small th:text="${#strings.abbreviate(prod.descricao, 60)}" style="color: var(--text-muted); font-size: 12px;"></small>
+                        </td>
+                        <td><span class="badge-categoria" th:text="${prod.categoria.nome}"></span></td>
+                        <td style="font-family: 'Rajdhani', sans-serif; font-weight: 700; color: var(--green);" th:text="${'R$ ' + #numbers.formatDecimal(prod.preco, 1, 'POINT', 2, 'COMMA')}"></td>
+                        <td>
+                            <span th:text="${prod.estoque}" th:class="${prod.estoque == 0} ? 'badge bg-perigo' : 'badge bg-sucesso'">0</span>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 6px; justify-content: center;">
+                                <a th:href="@{/produtos/{id}(id=${prod.id})}" class="btn btn-info btn-sm">Ver</a>
+                                <a th:href="@{/produtos/{id}/editar(id=${prod.id})}" class="btn btn-secundario btn-sm">Editar</a>
+                                <form th:action="@{/produtos/{id}/excluir(id=${prod.id})}" method="post"
+                                      onsubmit="return confirm('Excluir este produto permanentemente?');" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(produtos)}">
+                        <td colspan="6" class="empty-state"><p>Nenhum produto cadastrado.</p></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-
 </body>
 </html>

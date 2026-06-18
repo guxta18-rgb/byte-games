@@ -12,6 +12,7 @@
             <a href="/carrinho" class="btn btn-purple btn-sm">🛍️ Carrinho</a>
             <a href="/produtos" class="btn btn-secundario btn-sm">⚙️ Produtos</a>
             <a href="/categorias" class="btn btn-secundario btn-sm">📂 Categorias</a>
+            <a href="/faq" class="btn btn-secundario btn-sm">💬 FAQ</a>
         </div>
     </nav>
 
@@ -37,11 +38,8 @@
             <div class="card-produto" th:each="prod : ${produtos}">
                 <div>
                     <a th:href="@{/produto/{id}(id=${prod.id})}" style="text-decoration: none; color: inherit; display: block; cursor: pointer;">
-                        <div class="card-produto-imagem">
-                            <img th:src="${prod.imagem != null && !prod.imagem.empty} ? @{/uploads/{img}(img=${prod.imagem})} : @{/img/default-game.png}" alt="Imagem do Jogo" />
-                        </div>
                         <span class="badge-categoria" th:text="${prod.categoria.nome}"></span>
-                        <h4 th:text="${prod.nome}"></h4>
+                        <h4 th:text="${prod.nome}" style="margin-top: 10px;"></h4>
                     </a>
                     <p th:text="${#strings.abbreviate(prod.descricao, 100)}" style="color: var(--text-secondary); font-size: 13px; line-height: 1.5; margin-top: 8px;"></p>
                 </div>

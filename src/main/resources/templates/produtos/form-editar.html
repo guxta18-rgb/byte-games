@@ -17,8 +17,7 @@
         <div class="form-container">
             <h3 style="color: var(--purple);">✏️ Editar Produto</h3>
 
-            <form th:action="@{/produtos/{id}(id=${produto.id})}" th:object="${produto}" method="post" enctype="multipart/form-data">
-                <input type="hidden" th:field="*{imagem}">
+            <form th:action="@{/produtos/{id}(id=${produto.id})}" th:object="${produto}" method="post">
 
                 <div class="form-group">
                     <label for="nome">Nome do Jogo</label>
@@ -59,21 +58,6 @@
                     <span class="erro-validacao" th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}"></span>
                 </div>
 
-                <div class="form-group">
-                    <label for="imagemFile">Imagem do Jogo</label>
-                    <div class="image-upload-wrapper">
-                        <input type="file" id="imagemFile" name="imagemFile" accept="image/*" class="file-input" onchange="previewImage(event)">
-                        <div id="imagePreviewContainer" class="image-preview-container" style="margin-top: 10px;">
-                            <img id="imagePreview" 
-                                 th:src="${produto.imagem != null && !produto.imagem.empty} ? @{/uploads/{img}(img=${produto.imagem})} : '#'" 
-                                 th:style="${produto.imagem != null && !produto.imagem.empty} ? 'max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid var(--border); display: block;' : 'max-width: 200px; max-height: 200px; border-radius: 8px; border: 1px solid var(--border); display: none;'" 
-                                 alt="Prévia da imagem" />
-                        </div>
-                    </div>
-                    <small style="color: var(--text-secondary); display: block; margin-top: 5px;">Selecione um arquivo de imagem caso deseje atualizar a atual (PNG, JPG, JPEG).</small>
-                    <span class="erro-validacao" th:if="${#fields.hasErrors('imagem')}" th:errors="*{imagem}"></span>
-                </div>
-
                 <div style="display: flex; justify-content: space-between; margin-top: 30px;">
                     <a href="/produtos" class="btn btn-secundario">Cancelar</a>
                     <button type="submit" class="btn btn-purple">✓ Atualizar Dados</button>
@@ -81,19 +65,5 @@
             </form>
         </div>
     </div>
-
-    <script>
-        function previewImage(event) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                const output = document.getElementById('imagePreview');
-                output.src = reader.result;
-                output.style.display = 'block';
-            };
-            if(event.target.files[0]) {
-                reader.readAsDataURL(event.target.files[0]);
-            }
-        }
-    </script>
 </body>
 </html>

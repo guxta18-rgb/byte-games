@@ -16,61 +16,49 @@
     </nav>
 
     <div class="container">
-        <div class="form-container" style="max-width: 900px;">
+        <div class="form-container" style="max-width: 600px;">
             <h3 style="text-align: left; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
                 🎮 Detalhes do Jogo
             </h3>
 
-            <div style="display: flex; gap: 32px; flex-wrap: wrap;">
-                <!-- Coluna da Imagem -->
-                <div style="flex: 1; min-width: 300px;">
-                    <div class="detalhe-imagem-container" style="max-height: 400px;">
-                        <img th:src="${produto.imagem != null && !produto.imagem.empty} ? @{/uploads/{img}(img=${produto.imagem})} : @{/img/default-game.png}" alt="Imagem do Jogo" />
+            <div>
+                <span class="badge-categoria" th:text="${produto.categoria.nome}"></span>
+                <h1 th:text="${produto.nome}" style="font-size: 32px; margin: 10px 0 15px; font-family: 'Rajdhani', sans-serif; font-weight: 700; color: var(--text-primary);"></h1>
+                
+                <div class="detail-row" style="margin-bottom: 20px;">
+                    <div class="detail-item">
+                        <label>Preço</label>
+                        <span class="detail-value" style="color: var(--green); font-size: 26px;"
+                              th:text="${'R$ ' + #numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}"></span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Status</label>
+                        <div style="margin-top: 4px;">
+                            <span th:text="${produto.estoque > 0} ? 'Disponível' : 'Esgotado'"
+                                  th:class="${produto.estoque == 0} ? 'badge bg-perigo' : 'badge bg-sucesso'"></span>
+                        </div>
+                    </div>
+                    <div class="detail-item" th:if="${produto.estoque > 0}">
+                        <label>Estoque</label>
+                        <span class="detail-value" style="font-size: 16px; color: var(--text-primary);" th:text="${produto.estoque + ' un.'}"></span>
                     </div>
                 </div>
 
-                <!-- Coluna de Detalhes -->
-                <div style="flex: 1.2; min-width: 300px; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div>
-                        <span class="badge-categoria" th:text="${produto.categoria.nome}"></span>
-                        <h1 th:text="${produto.nome}" style="font-size: 32px; margin: 10px 0 15px; font-family: 'Rajdhani', sans-serif; font-weight: 700; color: var(--text-primary);"></h1>
-                        
-                        <div class="detail-row" style="margin-bottom: 20px;">
-                            <div class="detail-item">
-                                <label>Preço</label>
-                                <span class="detail-value" style="color: var(--green); font-size: 26px;"
-                                      th:text="${'R$ ' + #numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}"></span>
-                            </div>
-                            <div class="detail-item">
-                                <label>Status</label>
-                                <div style="margin-top: 4px;">
-                                    <span th:text="${produto.estoque > 0} ? 'Disponível' : 'Esgotado'"
-                                          th:class="${produto.estoque == 0} ? 'badge bg-perigo' : 'badge bg-sucesso'"></span>
-                                </div>
-                            </div>
-                            <div class="detail-item" th:if="${produto.estoque > 0}">
-                                <label>Estoque</label>
-                                <span class="detail-value" style="font-size: 16px; color: var(--text-primary);" th:text="${produto.estoque + ' un.'}"></span>
-                            </div>
-                        </div>
+                <label>Descrição</label>
+                <div class="descricao-box" th:text="${produto.descricao}" style="font-size: 14px;"></div>
+            </div>
 
-                        <label>Descrição e Requisitos</label>
-                        <div class="descricao-box" th:text="${produto.descricao}" style="font-size: 14px;"></div>
-                    </div>
-
-                    <div style="display: flex; gap: 12px; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">
-                        <a href="/" class="btn btn-secundario" style="flex: 1; justify-content: center;">← Voltar para a Vitrine</a>
-                        
-                        <div style="flex: 1.5;" th:if="${produto.estoque > 0}">
-                            <form th:action="@{/carrinho/adicionar}" method="post">
-                                <input type="hidden" name="produtoId" th:value="${produto.id}">
-                                <button type="submit" class="btn btn-principal" style="width: 100%; justify-content: center; height: 44px; font-size: 15px;">🛍️ Adicionar ao Carrinho</button>
-                            </form>
-                        </div>
-                        <div style="flex: 1.5;" th:if="${produto.estoque == 0}">
-                            <button class="btn btn-secundario" style="width: 100%; justify-content: center; cursor: not-allowed; opacity: 0.45; height: 44px; font-size: 15px;" disabled>Esgotado</button>
-                        </div>
-                    </div>
+            <div style="display: flex; gap: 12px; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">
+                <a href="/" class="btn btn-secundario" style="flex: 1; justify-content: center;">← Voltar para a Vitrine</a>
+                
+                <div style="flex: 1.5;" th:if="${produto.estoque > 0}">
+                    <form th:action="@{/carrinho/adicionar}" method="post">
+                        <input type="hidden" name="produtoId" th:value="${produto.id}">
+                        <button type="submit" class="btn btn-principal" style="width: 100%; justify-content: center; height: 44px; font-size: 15px;">🛍️ Adicionar ao Carrinho</button>
+                    </form>
+                </div>
+                <div style="flex: 1.5;" th:if="${produto.estoque == 0}">
+                    <button class="btn btn-secundario" style="width: 100%; justify-content: center; cursor: not-allowed; opacity: 0.45; height: 44px; font-size: 15px;" disabled>Esgotado</button>
                 </div>
             </div>
         </div>

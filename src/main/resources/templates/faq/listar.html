@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ByteGames - FAQ da Loja</title>
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+    <style>
+        .faq-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+        }
+        .faq-card:hover {
+            border-color: var(--purple);
+            transform: translateY(-2px);
+        }
+        .faq-question {
+            color: var(--purple);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .faq-answer {
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin-bottom: 14px;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .faq-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+        .faq-email {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .faq-actions {
+            display: flex;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar compartilhada -->
+    <nav class="navbar" th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">💬 FAQ da Loja</h1>
+                <p class="page-subtitle">Perguntas e respostas frequentes para auxiliar nossos usuários</p>
+            </div>
+            <a href="/faq/novo" class="btn btn-principal">+ Adicionar FAQ</a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(faqs)}" class="empty-state">
+            <p>Nenhuma pergunta cadastrada no FAQ até o momento.</p>
+        </div>
+
+        <div th:each="faq : ${faqs}" class="faq-card">
+            <div class="faq-question">
+                <span>❓</span>
+                <span th:text="${faq.pergunta}">Pergunta</span>
+            </div>
+            <div class="faq-answer" th:text="${faq.resposta}">Resposta</div>
+            
+            <div class="faq-meta">
+                <div class="faq-email">
+                    <span>📧 Contato: </span>
+                    <strong th:text="${faq.emailContato}">contato@loja.com</strong>
+                </div>
+                <div class="faq-actions">
+                    <a th:href="@{/faq/{id}/editar(id=${faq.id})}" class="btn btn-secundario btn-sm">Editar</a>
+                    <form th:action="@{/faq/{id}/excluir(id=${faq.id})}" method="post"
+                          onsubmit="return confirm('Deseja realmente excluir esta pergunta do FAQ?');" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

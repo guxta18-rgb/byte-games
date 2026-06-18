@@ -1,11 +1,10 @@
 package loja.bytegames.repository;
 
-import loja.bytegames.model.Produto;
-import loja.bytegames.model.Categoria;
+import loja.bytegames.Produto;
+import loja.bytegames.Categoria;
 import java.util.List;
 import java.util.Optional;
 import java.math.BigDecimal;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,73 +12,55 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
-    // O Spring Data cria essa busca por aproximação de nome automaticamente pelo
-    // nome do método!
+    // Método que busca produtos aproximando o nome informado (ex: pesquisar na vitrine)
     List<Produto> findByNomeContainingIgnoreCase(String nome);
 
-    // --- Métodos de compatibilidade (para não quebrar o código existente) ---
-
-    // Retorna todos os produtos usando o findAll() que já vem pronto no
-    // JpaRepository
+    // Método padrão para buscar todos os produtos cadastrados
     default List<Produto> buscarTodosProdutos() {
         return findAll();
     }
 
-    // Busca o produto pelo ID usando o findById(id) que já vem pronto no
-    // JpaRepository
+    // Método padrão para buscar um produto pelo ID
     default Optional<Produto> buscarProdutoPorId(Long id) {
         return findById(id);
     }
 
-    // Insere um novo produto criando o objeto Produto e associando a categoria pelo
-    // ID
-    default void inserirProduto(String nome,
-            String descricao,
-            BigDecimal preco,
-            Integer estoque,
-            Long categoriaId,
-            String imagem) {
+    // Método personalizado para criar um novo produto e associar sua categoria
+    default void inserirProduto(String nome, String descricao, BigDecimal preco, Integer estoque, Long categoriaId) {
         Produto produto = new Produto();
         produto.setNome(nome);
         produto.setDescricao(descricao);
         produto.setPreco(preco);
         produto.setEstoque(estoque);
-        produto.setImagem(imagem);
 
-        // Cria e associa a categoria através do ID informado
+        // Cria a categoria apenas com o ID informado
         Categoria categoria = new Categoria();
         categoria.setId(categoriaId);
         produto.setCategoria(categoria);
 
-        save(produto); // Salva o produto automaticamente no banco de dados!
+        // Salva o produto no banco
+        save(produto);
     }
 
-    // Atualiza um produto existente buscando por ID e salvando com save()
-    default void atualizarProduto(Long id,
-            String nome,
-            String descricao,
-            BigDecimal preco,
-            Integer estoque,
-            Long categoriaId,
-            String imagem) {
+    // Método personalizado para atualizar um produto existente
+    default void atualizarProduto(Long id, String nome, String descricao, BigDecimal preco, Integer estoque, Long categoriaId) {
+        // Busca o produto pelo ID no banco de dados
         findById(id).ifPresent(produto -> {
             produto.setNome(nome);
             produto.setDescricao(descricao);
             produto.setPreco(preco);
             produto.setEstoque(estoque);
-            produto.setImagem(imagem);
 
-            // Cria e associa a categoria através do ID informado
             Categoria categoria = new Categoria();
             categoria.setId(categoriaId);
             produto.setCategoria(categoria);
 
-            save(produto); // O save() atualiza o registro existente porque ele já possui um ID!
+            // Grava as atualizações de volta no banco
+            save(produto);
         });
     }
 
-    // Deleta um produto pelo ID usando o deleteById(id) que já vem pronto no
-    // JpaRepository
+    // Método padrão para deletar um produto pelo ID
     default void deletarProdutoPorId(Long id) {
         deleteById(id);
     }
