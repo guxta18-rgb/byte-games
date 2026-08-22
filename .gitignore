@@ -34,3 +34,7 @@ build/
 
 # Variáveis de Ambiente locais
 .env
+
+### Projeto ###
+.env
+uploads/
